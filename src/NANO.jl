@@ -371,3 +371,5 @@ function optimize_nn(
     @info("Loss: $(loss(target,output))")
     return output
 end
+
+end

@@ -12,12 +12,16 @@ target[51:100,2].=1.0
 target[101:150,3].=1.0
 target
 
-function predict_iris(hidden_layers::Int,nodes_per_layer::Int)
+function predict_iris(hidden_layers::Int,nodes_per_layer::Int,method::Symbol)
     nn=NANO.NeuralNetwork(4,hidden_layers,[(:sigmoid,nodes_per_layer)],[(:sigmoid,3)])
 
-    output = NANO.optimize_nn(nn,input,target,:penalty,0.0001)
-
-    #output = NANO.train_nn(nn,input,target,10000,0.05)
+    if method==:optimize
+        output = NANO.optimize_nn(nn,input,target,:penalty,0.0001)
+    elseif method==:backprop
+        output = NANO.train_nn(nn,input,target,50000,0.05)
+    else
+        error("method must be either :optimize or :backprop")
+    end
 
     loss = NANO.loss(output,target)
 
@@ -44,7 +48,12 @@ function predict_iris(hidden_layers::Int,nodes_per_layer::Int)
     return loss, count
 end
 
-predict_iris(1,1)
-predict_iris(1,2)
-predict_iris(2,1)
-predict_iris(2,2)
+predict_iris(1,1,:optimize)
+predict_iris(1,2,:optimize)
+predict_iris(2,1,:optimize)
+predict_iris(2,2,:optimize)
+
+predict_iris(1,1,:backprop)
+predict_iris(1,2,:backprop)
+predict_iris(2,1,:backprop)
+predict_iris(2,2,:backprop)

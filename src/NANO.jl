@@ -197,12 +197,36 @@ function train_nn(
     iterations::Int,
     eta::Float64,
 )
+    net, active = forward(input, nn)
+    lss = loss(active[end],target)
+    println("Initial Loss: $(lss)")
+    nn_backup=deepcopy(nn)
     for i in 1:iterations
-        net, active = forward(input, nn)
         del_j = backward(net, active, target, nn)
         update_weights(active, del_j, nn, eta)
+        if i%100==0
+            prev_lss = lss
+            poss_lss = loss(active[end],target)
+            if prev_lss < poss_lss
+                eta*=0.9
+                @info("Reducing η to $(eta)")
+                nn = nn_backup
+            else
+                lss = poss_lss
+            end
+            @info("Iteration $i: $lss")
+            nn_backup=deepcopy(nn)
+        end
+        if isnan(active[end][1])
+            eta*=0.9
+            println("Reducing η to $(eta)")
+            nn = nn_backup
+            nn_backup=deepcopy(nn)
+        end
+        net, active = forward(input, nn)
     end
-    return forward(input, nn)[2][end]
+    @info("Final loss: $(loss(active[end],target))")
+    return active[end]
 end
 
 function loss(
@@ -233,6 +257,7 @@ function optimize_nn(
     nn.num_nodes[end] += 1
 
     model = JuMP.Model(Ipopt.Optimizer)
+    set_optimizer_attribute(model,"max_iter",4000)
 
     if regularization == :bound
         @variable(

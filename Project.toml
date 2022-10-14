@@ -1,7 +1,7 @@
 name = "NANO"
 uuid = "7dcd9aa5-12f5-49a6-b198-922edfbc1ded"
 authors = ["Anthony Downward"]
-version = "0.0.1"
+version = "0.0.2"
 
 [deps]
 JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
